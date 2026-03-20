@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Template</title>
+  <style>
+    /* Your original CSS unchanged */
+    body {
+      font-family: sans-serif;
+      font-size: larger;
+      font-weight: bold;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      padding: 1em;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    #speak {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+    main {
+      max-width: 600px;
+      background: white;
+      padding: 1.5em;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    button {
+      background: none;
+      border: 2px solid #0078d4;
+      color: #0078d4;
+      font-size: 20px;
+      margin: 5px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: #0078d4;
+      color: white;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    input[type="number"] {
+      font-size: 14px;
+      width: 60px;
+      margin-right: 10px;
+      text-align: center;
+    }
+
+    #keyWords {
+      text-align: center;
+      color: #0078d4;
+      font-size: 1.3em;
+      margin-bottom: 10px;
+    }
+
+    #english {
+      color: #444;
+    }
+
+    #q {
+      background: #0078d4;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+
+    .controls {
+      margin-top: 1em;
+      text-align: center;
+    }
+
+    details {
+      margin-top: 0.5em;
+    }
+
+    small {
+      color: #777;
+      font-weight: normal;
+    }
+
+    footer {
+      margin-top: auto;
+      text-align: center;
+      padding: 1em 0;
+      font-size: 0.9em;
+      color: #555;
+    }
+
+    footer span {
+      color: #0078d4;
+      font-weight: bold;
+    }
+
+    section.general.info,
+    section.activity {
+      width: 100%;
+      max-width: 600px;
+      box-sizing: border-box;
+    }
+
+    section.general.info details,
+    section.activity details {
+      display: block;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 10px;
+      background: white;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      margin: 0.5em 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9em;
+    }
+
+    th, td {
+      border: 1px solid #333;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+    #arabic{
+      direction: rtl;
+      text-align: right;
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 0.6em;
+      }
+      #q { font-size: 0.9em; }
+      button { font-size: 18px; padding: 4px 8px; }
+    }
+    #objectives{
+      color: red;
+    }
+    #questionBasedOnAudio{
+      color: blue;
+      text-align: left;
+    }
+    main {
+      overflow-y: auto;
+    }
+    #questionBasedOnAudio li,
+      #answer li {
+    margin-bottom: 0.8em;
+    }
+    #questionBasedOnAudio ol { padding-left: 1em; }
+    .tts-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+      flex-wrap: wrap; /* keeps it mobile-friendly */
+    }
+  </style>
+</head>
+
+<body role="document">
+
+  <!-- Added role="main" -->
+  <main role="main" aria-label="Lesson player interface">
+
+    <p id="speaker" aria-label="Speaker name"></p>
+    <p id="q" aria-live="polite"></p>
+    <p id="keyWords" aria-label="Keywords"></p>
+
+    <details id="definition" aria-label="Definition section">
+      <summary aria-label="Show or hide definition">Definition</summary>
+      <p id="def"></p>
+    </details>
+
+    <details id="illustrations" style="display:none;" aria-label="Illustration section">
+      <summary aria-label="Show or hide illustration">Illustration</summary>
+      <img id="image" alt="Related illustration" width="200" height="200" style="display:none;">
+    </details>
+
+    <details id="englishDetails" aria-label="English explanation">
+      <summary aria-label="Show or hide English explanation">English:</summary>
+      <p id="english"></p>
+    </details>
+
+    <details id="arabicDetails" aria-label="Arabic explanation">
+      <summary aria-label="Show or hide Arabic explanation">Arabic:</summary>
+      <p id="arabic"></p>
+    </details>
+
+    <p id="refer_to_container"><strong>Refer to:</strong> <span id="refer_to"></span></p>
+    <p id="back_to_container"><strong>Back to:</strong> <span id="back_to"></span></p>
+
+    <!-- ARIA enhancement -->
+    <audio id="audio" controls aria-label="Audio player">
+      <source src="" type="audio/mp3" />
+      Your browser does not support the audio element.
+    </audio>
+
+    <hr>
+
+    <div class="controls" role="group" aria-label="Navigation controls">
+
+      <input 
+        type="number" 
+        id="audioIndex" 
+        min="1" 
+        placeholder="#" 
+        aria-label="Enter clip number"
+      />
+
+      <button id="search" aria-label="Search for audio by number">&#128269;</button>
+
+      <button id="prev" aria-label="Previous audio clip">&#9664;</button>
+      <button id="next" aria-label="Next audio clip">&#9654;</button>
+
+      <label aria-label="Autoplay next audio">
+        <input type="checkbox" id="autoPlay" unchecked aria-checked="false" />
+        Auto play next audio clip
+      </label>
+
+      <div id="questionBasedOnAudio"></div>
+    </div>
+
+    <details aria-label="Text-to-speech options">
+      <summary aria-label="Show or hide text-to-speech controls">TTS</summary>
+
+      <div class="tts-buttons" role="group" aria-label="TTS controls">
+        <button id="speak" aria-label="Text to speech: read all text">TTS-All text</button>
+        <button id="stop" aria-label="Stop text to speech">Stop TTS</button>
+        <button id="speakSelection" aria-label="Text to speech: read selected text">TTS-Selected</button>
+      </div>
+    </details>
+     
+    <div>
+      <details id="answerDetails" aria-label="Answer section">
+        <summary aria-label="Show or hide answer">Answer</summary>
+        <div id="answer"></div>
+      </details>
+    </div>
+
+    <hr>
+
+    <small aria-label="Tip: Use arrow keys">💡 Tip: Use ← / → to navigate.</small>
+  </main>
+
+  <footer role="contentinfo">
+    <p>Created by <span>Eltayeb Mohamed</span> | <span>© 2025 Eltayeb Mohamed</span>. All rights reserved.</p>
+  </footer>
+
+  <!-- JS Unchanged except ARIA support integrated where appropriate -->
+  <script>
+    const utterance = new SpeechSynthesisUtterance();
+    let currentAudioIndex = 0;
+
+    const Sentences = [
+      /* your entire array unchanged */
+
+      //1
+            {
+        speaker: `Ahmed:`,
+        keyWord: ``,
+        definition: ``,
+        english: `Henry, I love this mall.`,
+        arabic: `هنري، أنا أحب هذا المول`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `Henry, I love this mall.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+      //2
+      {
+        speaker: `Henry:`,
+        keyWord: ``,
+        definition: ``,
+        english: `Really, Ahmed?`,
+        arabic: `حقًا، أحمد؟`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `Really, Ahmed.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+      //3
+      {
+        speaker: `Ahmed:`,
+        keyWord: ``,
+        definition: ``,
+        english: `Yeah, there’s so much to do`,
+        arabic: `نعم، هناك الكثير للقيام به.`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `Yeah, there’s so much to do.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+      //4
+      {
+        speaker: `Henry:`,
+        keyWord: ``,
+        definition: ``,
+        english: `Like what?`,
+        arabic: `مثل ماذا؟`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `Like what.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+      //5
+      {
+        speaker: `Ahmed:`,
+        keyWord: ``,
+        definition: ``,
+        english: `Well, I buy clothes.`,
+        arabic: `حسنًا، أنا أشتري الملابس.`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `Well, I buy clothes.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+      //6
+      {
+        speaker: `Henry:`,
+        keyWord: ``,
+        definition: ``,
+        english: `Why here?`,
+        arabic: `لماذا هنا؟`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `Why here.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+      //7
+      {
+        speaker: `Ahmed:`,
+        keyWord: ``,
+        definition: ``,
+        english: `Because the clothing stores are really amazing here.`,
+        arabic: `لأن متاجر الملابس هنا مذهلة حقًا.`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `Because the clothing stores are really amazing here.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+      //8
+      {
+        speaker: `Henry:`,
+        keyWord: ``,
+        definition: ``,
+        english: `OK. Why else do you come here?`,
+        arabic: `حسنًا. لماذا تأتي إلى هنا أيضًا؟`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `OK Why else do you come here.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+      //
+       {
+        speaker: `Ahmed:`,
+        keyWord: ``,
+        definition: ``,
+        english: `Well, I go to the restaurants because of the delicious food.`,
+        arabic: `حسنًا، أذهب إلى المطاعم بسبب الطعام اللذيذ.`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `Well, I go to the restaurants because of the delicious food.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+      {
+        speaker: `Ahmed:`,
+        keyWord: ``,
+        definition: ``,
+        english: `Well, I go to the restaurants`,
+        arabic: `أنا أذهب إلى المطاعم`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `I go to the restaurants.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+       {
+        speaker: `Ahmed:`,
+        keyWord: ``,
+        definition: ``,
+        english: `because of the delicious food.`,
+        arabic: `بسبب الطعام اللذيذ.`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `because of the delicious food.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+
+      
+      //9
+      
+      //10
+      {
+        speaker: `Henry:`,
+        keyWord: ``,
+        definition: ``,
+        english: `What else do you do here?`,
+        arabic: `ماذا تفعل هنا أيضًا؟`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `What else do you do here.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+      
+      //11
+     
+      {
+        speaker: `Ahmed:`,
+        keyWord: ``,
+        definition: ``,
+        english: `I meet my friends.`,
+        arabic: `ألتقي بأصدقائي.`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `I meet my friends.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+      //12
+       {
+        speaker: `Ahmed:`,
+        keyWord: ``,
+        definition: ``,
+        english: `Sometimes I watch the people.`,
+        arabic: `أحيانًا أشاهد الناس.`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `Sometimes I watch the people.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+      //13
+      {
+        speaker: `Ahmed:`,
+        keyWord: ``,
+        definition: ``,
+        english: `Why do you come here, Henry?`,
+        arabic: `لماذا تأتي إلى هنا، هنري؟`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `Why do you come here, Henry.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+      //14
+      {
+        speaker: `Henry:`,
+        keyWord: ``,
+        definition: ``,
+        english: `Well, I really don’t come here often.`,
+        arabic: `حسنًا، أنا حقًا لا أتي هنا كثيرًا.`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `Well, I really don’t come here often.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+      {
+        speaker: `Henry:`,
+        keyWord: ``,
+        definition: ``,
+        english: `But sometimes I shop for clothes here.`,
+        arabic: `لكن أحيانًا أتسوق للملابس هنا.`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `But sometimes I shop for clothes here.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+      //15
+      {
+        speaker: `Ahmed:`,
+        keyWord: ``,
+        definition: ``,
+        english: `You buy clothes here?`,
+        arabic: `هل تشتري الملابس هنا؟`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `You buy clothes here.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+      //16
+      
+      //17
+      
+      //18
+      {
+        speaker: `Henry:`,
+        keyWord: ``,
+        definition: ``,
+        english: `Yeah, because they’re really cheap.`,
+        arabic: `نعم، لإنها رخيصه حقًا`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `Yeah, because they’re really cheap.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+      //19
+      {
+        speaker: `Ahmed:`,
+        keyWord: ``,
+        definition: ``,
+        english: `I know.`,
+        arabic: `أنا أعلم.`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `I know.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+      //20
+      {
+        speaker: `Henry:`,
+        keyWord: ``,
+        definition: ``,
+        english: `I don’t like the food here.`,
+        arabic: `أنا لا أحب الطعام هنا.`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `I don’t like the food here.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+      //21
+      {
+        speaker: `Henry:`,
+        keyWord: ``,
+        definition: ``,
+        english: `It’s all junk food.`,
+        arabic: `كله طعام غير صحي.`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `It’s all junk food.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+      //22
+      {
+        speaker: `HenrY:`,
+        keyWord: ``,
+        definition: ``,
+        english: `But I do sometimes meet my friends here for coffee.`,
+        arabic: `لكنني ألتقي أحيانًا بأصدقائي هنا لتناول القهوة.`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `But I do sometimes meet my friends here for coffee.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+      //23
+       {
+        speaker: `Ahmed:`,
+        keyWord: ``,
+        definition: ``,
+        english: `Uh-huh `,
+        arabic: `آه-ها`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `Uh-huh.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+      //24
+      {
+        speaker: `Henry:`,
+        keyWord: ``,
+        definition: ``,
+        english: `But I don’t like malls.`,
+        arabic: `لكن لا يعجبني المولات.`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `But I don’t like malls.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+      //25
+      {
+        speaker: `Henry:`,
+        keyWord: ``,
+        definition: ``,
+        english: `I like nature, hiking paths.`,
+        arabic: `أنا يعجبني الطبيعة ومسارات المشي.`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `I like nature, hiking paths.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+      //26
+      {
+        speaker: `Henry:`,
+        keyWord: ``,
+        definition: ``,
+        english: `It’s too noisy here.`,
+        arabic: `الضوضاء هنا عالية جدًا.`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `it is noisy here.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+      //27
+      {
+        speaker: `Ahmed:`,
+        keyWord: ``,
+        definition: ``,
+        english: `Yeah, you’re right.`,
+        arabic: `نعم، أنت محق.`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `Yeah, you’re right.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+      //28
+      {
+        speaker: `Ahmed:`,
+        keyWord: ``,
+        definition: ``,
+        english: `It is noisy.`,
+        arabic: `إنه صاخب.`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `It is noisy.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+      //29
+      {
+        speaker: `Ahmed:`,
+        keyWord: ``,
+        definition: ``,
+        english: `but I still really like it.`,
+        arabic: `لكن ما زال يعجبني حقًا.`,
+        refer_to: ``,
+        back_to: ``,
+        audio: `but I still really like it.mp3`,
+        audioQuestion: ``,
+        answer: ``,
+        Image:``
+      },
+      //30
+      
+      
+    ];
+
+    const speakSelectionBtn = document.getElementById("speakSelection");
+    const speakBtn = document.getElementById("speak");
+    const stopBtn = document.getElementById("stop");
+
+    const q = document.getElementById("q");
+    const refer_to = document.getElementById("refer_to");
+    const back_to = document.getElementById("back_to");
+    const speaker = document.getElementById("speaker");
+    const keyWords = document.getElementById("keyWords");
+    const def = document.getElementById("def");
+    const english = document.getElementById("english");
+    const arabic = document.getElementById("arabic");
+    const audio = document.getElementById("audio");
+    const image = document.getElementById("image");
+    const illustrationDetails = document.getElementById("illustrations");
+    const questionBasedOnAudio = document.getElementById("questionBasedOnAudio");
+    const audioIndexInput = document.getElementById("audioIndex");
+    const autoPlayCheckbox = document.getElementById("autoPlay");
+
+    const definitionDetails = document.getElementById("definition");
+    const englishDetails = document.getElementById("englishDetails");
+    const arabicDetails = document.getElementById("arabicDetails");
+    const answer = document.getElementById("answer");
+    const answerDetails = document.getElementById("answerDetails");
+    const prevBtn = document.getElementById("prev");
+    const nextBtn = document.getElementById("next");
+
+    speakBtn.addEventListener("click", () => {
+        const s = Sentences[currentAudioIndex];
+        if (s.english?.trim()) {
+            const cleanedText = s.english.replace(/<br\s*\/?>/gi, ' '); 
+            utterance.text = cleanedText;  
+            speechSynthesis.cancel();      
+            speechSynthesis.speak(utterance);
+        }
+    });
+
+    speakSelectionBtn.addEventListener("click", () => {
+      const selectedText = window.getSelection().toString().trim();
+      if (!selectedText) return;
+      utterance.text = selectedText;
+      speechSynthesis.cancel();
+      speechSynthesis.speak(utterance);
+    });
+
+    stopBtn.addEventListener("click", () => {
+      speechSynthesis.cancel();
+    });
+
+    function updateButtonState() {
+      prevBtn.disabled = currentAudioIndex === 0;
+      nextBtn.disabled = currentAudioIndex === Sentences.length - 1;
+    }
+
+    function displayData() {
+      const s = Sentences[currentAudioIndex];
+
+      q.textContent = `${currentAudioIndex + 1}/${Sentences.length}`;
+
+      refer_to.textContent = s.refer_to || "";
+      back_to.textContent = s.back_to || "";
+
+      const referToContainer = document.getElementById("refer_to_container");
+      const backToContainer = document.getElementById("back_to_container");
+
+      referToContainer.style.display = s.refer_to?.trim() ? "block" : "none";
+      backToContainer.style.display = s.back_to?.trim() ? "block" : "none";
+
+      keyWords.innerHTML = s.keyWord || "";
+      speaker.innerHTML = s.speaker || "";
+      def.innerHTML = s.definition || "";
+      english.innerHTML = s.english || "";
+      arabic.innerHTML = s.arabic || "";
+      audio.src = s.audio || "";
+      answer.innerHTML = s.answer || "";
+
+      questionBasedOnAudio.innerHTML = s.audioQuestion?.trim()
+        ? `<details aria-label="Audio question"><summary>Question</summary>${s.audioQuestion}</details>`
+        : "";
+
+      answerDetails.style.display = s.answer?.trim() ? "block" : "none";
+      definitionDetails.style.display = s.definition?.trim() ? "block" : "none";
+      englishDetails.style.display = s.english?.trim() ? "block" : "none";
+      arabicDetails.style.display = s.arabic?.trim() ? "block" : "none";
+
+      if (s.Image && s.Image.trim() !== "" && s.Image !== ".jpg") {
+        image.src = s.Image;
+        image.style.display = "block";
+        illustrationDetails.style.display = "block";
+      } else {
+        image.removeAttribute("src");
+        image.style.display = "none";
+        illustrationDetails.style.display = "none";
+      }
+
+      updateButtonState();
+    }
+
+    function resetDetails() {
+      definitionDetails.open = false;
+      englishDetails.open = true;
+      arabicDetails.open = true;
+      answerDetails.open = false;
+    }
+
+    function nextSentence() {
+      if (currentAudioIndex < Sentences.length - 1) {
+        currentAudioIndex++;
+        displayData();
+        resetDetails();
+        if (autoPlayCheckbox.checked) audio.play().catch(() => {});
+      }
+    }
+
+    function prevSentence() {
+      if (currentAudioIndex > 0) {
+        currentAudioIndex--;
+        displayData();
+        resetDetails();
+        if (autoPlayCheckbox.checked) audio.play().catch(() => {});
+      }
+    }
+
+    nextBtn.addEventListener("click", nextSentence);
+    prevBtn.addEventListener("click", prevSentence);
+
+    document.getElementById("search").addEventListener("click", () => {
+      const index = parseInt(audioIndexInput.value, 10) - 1;
+      if (index >= 0 && index < Sentences.length) {
+        currentAudioIndex = index;
+        displayData();
+      } else {
+        alert(`Enter a number between 1 and ${Sentences.length}`);
+      }
+    });
+
+    audioIndexInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") document.getElementById("search").click();
+    });
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "ArrowRight") nextSentence();
+      if (e.key === "ArrowLeft") prevSentence();
+    });
+
+    displayData();
+  </script>
+</body>
+</html>
